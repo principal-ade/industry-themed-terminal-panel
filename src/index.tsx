@@ -7,18 +7,24 @@ import type { PanelDefinition, PanelContextValue } from './types';
  */
 export const panels: PanelDefinition[] = [
   {
-    id: 'com.principal.terminal',
-    name: 'Terminal',
-    icon: '⚡',
-    version: '0.1.0',
-    author: 'Principal',
-    description: 'Integrated terminal emulator with industry theming',
+    metadata: {
+      id: 'com.principal.terminal',
+      name: 'Terminal',
+      icon: '⚡',
+      version: '0.1.0',
+      author: 'Principal',
+      description: 'Integrated terminal emulator with industry theming',
+      slices: ['terminal'], // Declares dependency on 'terminal' data slice
+    },
     component: TerminalPanel,
 
     // Optional: Called when this specific panel is mounted
     onMount: async (context: PanelContextValue) => {
       // eslint-disable-next-line no-console
-      console.log('Terminal Panel mounted for repository:', context.repositoryPath);
+      console.log(
+        'Terminal Panel mounted for repository:',
+        context.currentScope.repository?.path
+      );
 
       // Verify terminal capability is available
       if (!context.hasSlice('terminal')) {
@@ -52,3 +58,17 @@ export const onPackageUnload = async () => {
   // eslint-disable-next-line no-console
   console.log('Panel package unloading - Terminal Panel Extension');
 };
+
+// Re-export types for convenience
+export type {
+  PanelDefinition,
+  PanelMetadata,
+  PanelComponentProps,
+  PanelContextValue,
+  PanelActions,
+  PanelEventEmitter,
+  TerminalSessionInfo,
+  CreateTerminalSessionOptions,
+  TerminalPanelActions,
+  TerminalEventType,
+} from './types';

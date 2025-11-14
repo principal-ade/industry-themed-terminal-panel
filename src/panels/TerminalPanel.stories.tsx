@@ -2,7 +2,12 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { ThemeProvider } from '@a24z/industry-theme';
 import { TerminalPanel } from './TerminalPanel';
 import { MockPanelProvider } from '../mocks/panelContext';
-import type { PanelActions, PanelEventEmitter, PanelEvent } from '../types';
+import type {
+  TerminalPanelActions,
+  PanelEventEmitter,
+  PanelEvent,
+  CreateTerminalSessionOptions,
+} from '../types';
 
 /**
  * Mock Terminal Backend Simulator
@@ -22,7 +27,7 @@ class MockTerminalBackend {
     this.eventEmitter = emitter;
   }
 
-  createSession(options?: { cwd?: string; command?: string }): string {
+  createSession(options?: CreateTerminalSessionOptions): string {
     const sessionId = `mock-session-${++this.sessionCounter}`;
     const cwd = options?.cwd || '/Users/developer/my-project';
     const shell = 'zsh';
@@ -154,8 +159,8 @@ const mockBackend = new MockTerminalBackend();
 /**
  * Create mock actions with terminal backend
  */
-const createTerminalMockActions = (): PanelActions => ({
-  createTerminalSession: async (options) => {
+const createTerminalMockActions = (): TerminalPanelActions => ({
+  createTerminalSession: async (options?: CreateTerminalSessionOptions) => {
     // eslint-disable-next-line no-console
     console.log('[Mock] Creating terminal session:', options);
     return mockBackend.createSession(options);
@@ -222,8 +227,13 @@ export const Default: Story = {
       <div style={{ height: '600px', width: '100%' }}>
         <MockPanelProvider
           contextOverrides={{
-            repositoryPath: '/Users/developer/my-project',
-            terminalSessions: [],
+            currentScope: {
+              type: 'repository' as const,
+              repository: {
+                name: 'my-project',
+                path: '/Users/developer/my-project',
+              },
+            },
           }}
           actionsOverrides={createTerminalMockActions()}
         >
@@ -246,7 +256,7 @@ export const Default: Story = {
 export const WithInitialCommand: Story = {
   render: () => {
     // Override createSession to run initial command
-    const actionsWithCommand: PanelActions = {
+    const actionsWithCommand: TerminalPanelActions = {
       ...createTerminalMockActions(),
       createTerminalSession: async (options) => {
         return mockBackend.createSession({
@@ -261,7 +271,7 @@ export const WithInitialCommand: Story = {
         <div style={{ height: '600px', width: '100%' }}>
           <MockPanelProvider
             contextOverrides={{
-              repositoryPath: '/Users/developer/my-project',
+              currentScope: { type: 'repository' as const, repository: { name: 'my-project', path: '/Users/developer/my-project' } },
             }}
             actionsOverrides={actionsWithCommand}
           >
@@ -287,12 +297,12 @@ export const DifferentDirectory: Story = {
       <div style={{ height: '600px', width: '100%' }}>
         <MockPanelProvider
           contextOverrides={{
-            repositoryPath: '/Users/developer/awesome-app',
-            repository: {
-              name: 'awesome-app',
-              path: '/Users/developer/awesome-app',
-              branch: 'feature/new-ui',
-              remote: 'origin',
+            currentScope: {
+              type: 'repository' as const,
+              repository: {
+                name: 'awesome-app',
+                path: '/Users/developer/awesome-app',
+              },
             },
           }}
           actionsOverrides={createTerminalMockActions()}
@@ -318,7 +328,7 @@ export const ErrorNoActions: Story = {
       <div style={{ height: '600px', width: '100%' }}>
         <MockPanelProvider
           contextOverrides={{
-            repositoryPath: '/Users/developer/my-project',
+            currentScope: { type: 'repository' as const, repository: { name: 'my-project', path: '/Users/developer/my-project' } },
           }}
           actionsOverrides={{
             // No terminal actions provided
@@ -343,7 +353,7 @@ export const ErrorSessionFailed: Story = {
       <div style={{ height: '600px', width: '100%' }}>
         <MockPanelProvider
           contextOverrides={{
-            repositoryPath: '/Users/developer/my-project',
+            currentScope: { type: 'repository' as const, repository: { name: 'my-project', path: '/Users/developer/my-project' } },
           }}
           actionsOverrides={{
             createTerminalSession: async () => {
@@ -370,7 +380,7 @@ export const MultiplePanels: Story = {
         <div style={{ flex: 1 }}>
           <MockPanelProvider
             contextOverrides={{
-              repositoryPath: '/Users/developer/project-1',
+              currentScope: { type: 'repository' as const, repository: { name: 'project-1', path: '/Users/developer/project-1' } },
             }}
             actionsOverrides={createTerminalMockActions()}
           >
@@ -383,7 +393,7 @@ export const MultiplePanels: Story = {
         <div style={{ flex: 1 }}>
           <MockPanelProvider
             contextOverrides={{
-              repositoryPath: '/Users/developer/project-2',
+              currentScope: { type: 'repository' as const, repository: { name: 'project-2', path: '/Users/developer/project-2' } },
             }}
             actionsOverrides={createTerminalMockActions()}
           >
@@ -409,7 +419,7 @@ export const CompactSize: Story = {
       <div style={{ height: '300px', width: '500px' }}>
         <MockPanelProvider
           contextOverrides={{
-            repositoryPath: '/Users/developer/my-project',
+            currentScope: { type: 'repository' as const, repository: { name: 'my-project', path: '/Users/developer/my-project' } },
           }}
           actionsOverrides={createTerminalMockActions()}
         >

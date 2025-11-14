@@ -1,30 +1,36 @@
-import type { ComponentType } from 'react';
+/**
+ * Terminal Panel Type Extensions
+ *
+ * This file extends the base panel-framework-core types with terminal-specific
+ * functionality. It imports core types and adds terminal session management.
+ */
+
+// Import core framework types
+export type {
+  PanelComponentProps,
+  PanelContextValue,
+  PanelActions,
+  PanelEventEmitter,
+  PanelEvent,
+  PanelEventType,
+  PanelDefinition,
+  PanelMetadata,
+  PanelLifecycleHooks,
+  DataSlice,
+  RepositoryMetadata,
+  WorkspaceMetadata,
+} from '@principal-ade/panel-framework-core';
+
+import type {
+  PanelActions as CorePanelActions,
+  PanelContextValue,
+  DataSlice,
+} from '@principal-ade/panel-framework-core';
 
 /**
- * Panel data slices available from the host application.
- * Panels can declare dependencies on these slices.
+ * Terminal-specific event type literals
  */
-export type PanelDataSlice =
-  | 'git'
-  | 'markdown'
-  | 'fileTree'
-  | 'packages'
-  | 'quality'
-  | 'terminal';
-
-/**
- * Panel event types for inter-panel communication.
- */
-export type PanelEventType =
-  | 'file:opened'
-  | 'file:saved'
-  | 'file:deleted'
-  | 'git:status-changed'
-  | 'git:commit'
-  | 'git:branch-changed'
-  | 'panel:focus'
-  | 'panel:blur'
-  | 'data:refresh'
+export type TerminalEventType =
   | 'terminal:data'
   | 'terminal:exit'
   | 'terminal:created'
@@ -32,80 +38,8 @@ export type PanelEventType =
   | 'terminal:cwd-change';
 
 /**
- * Panel event structure for communication between panels.
- */
-export interface PanelEvent<T = unknown> {
-  type: PanelEventType;
-  source: string;
-  timestamp: number;
-  payload?: T;
-}
-
-/**
- * Git change status types.
- */
-export type GitChangeSelectionStatus = 'staged' | 'unstaged' | 'untracked';
-
-/**
- * Git status information provided by the host.
- */
-export interface GitStatus {
-  staged: string[];
-  unstaged: string[];
-  untracked: string[];
-  deleted: string[];
-}
-
-/**
- * Repository metadata provided by the host.
- */
-export interface RepositoryMetadata {
-  name: string;
-  path: string;
-  branch?: string;
-  remote?: string;
-}
-
-/**
- * File tree node structure.
- */
-export interface FileTree {
-  name: string;
-  path: string;
-  type: 'file' | 'directory';
-  children?: FileTree[];
-}
-
-/**
- * Markdown file metadata.
- */
-export interface MarkdownFile {
-  path: string;
-  title?: string;
-  lastModified: number;
-}
-
-/**
- * Package layer information.
- */
-export interface PackageLayer {
-  name: string;
-  version: string;
-  path: string;
-}
-
-/**
- * Code quality metrics.
- */
-export interface QualityMetrics {
-  coverage?: number;
-  issues?: number;
-  complexity?: number;
-}
-
-/**
  * Terminal session metadata provided by the host.
- * Note: Does not include terminal buffer data - that streams via events.
+ * This is the data structure stored in the 'terminal' data slice.
  */
 export interface TerminalSessionInfo {
   id: string;
@@ -127,46 +61,10 @@ export interface CreateTerminalSessionOptions {
 }
 
 /**
- * Panel context value provided by the host application.
- * Contains shared data and state management functions.
+ * Extended panel actions that include terminal session management.
+ * Host applications implementing terminal panels must provide these actions.
  */
-export interface PanelContextValue {
-  // Repository metadata
-  repositoryPath: string | null;
-  repository: RepositoryMetadata | null;
-
-  // Data slices (panels can depend on these)
-  gitStatus: GitStatus;
-  gitStatusLoading: boolean;
-  markdownFiles: MarkdownFile[];
-  fileTree: FileTree | null;
-  packages: PackageLayer[] | null;
-  quality: QualityMetrics | null;
-
-  // Terminal sessions (metadata only, no buffer)
-  terminalSessions?: TerminalSessionInfo[];
-
-  // State management
-  loading: boolean;
-  refresh: () => Promise<void>;
-
-  // Utility methods
-  hasSlice: (slice: PanelDataSlice) => boolean;
-  isSliceLoading: (slice: PanelDataSlice) => boolean;
-}
-
-/**
- * Actions provided by the host application for panel interactions.
- */
-export interface PanelActions {
-  // File operations
-  openFile?: (filePath: string) => void;
-  openGitDiff?: (filePath: string, status?: GitChangeSelectionStatus) => void;
-
-  // Navigation
-  navigateToPanel?: (panelId: string) => void;
-  notifyPanels?: (event: PanelEvent) => void;
-
+export interface TerminalPanelActions extends CorePanelActions {
   // Terminal session management
   createTerminalSession?: (
     options?: CreateTerminalSessionOptions
@@ -182,56 +80,46 @@ export interface PanelActions {
 }
 
 /**
- * Event emitter for panel-to-panel communication.
+ * Helper function to get terminal sessions from the context.
+ * Terminal sessions are stored in the 'terminal' data slice.
  */
-export interface PanelEventEmitter {
-  emit<T>(event: PanelEvent<T>): void;
-  on<T>(
-    type: PanelEventType,
-    handler: (event: PanelEvent<T>) => void
-  ): () => void;
-  off<T>(type: PanelEventType, handler: (event: PanelEvent<T>) => void): void;
+export function getTerminalSessions(
+  context: PanelContextValue
+): TerminalSessionInfo[] {
+  const slice = context.getSlice<TerminalSessionInfo[]>('terminal');
+  return slice?.data ?? [];
 }
 
 /**
- * Props provided to all panel components by the host application.
+ * Helper function to get a specific terminal session by ID.
  */
-export interface PanelComponentProps {
-  /** Access to shared data and state */
-  context: PanelContextValue;
-
-  /** Actions for interpanel communication */
-  actions: PanelActions;
-
-  /** Event system for panel-to-panel communication */
-  events: PanelEventEmitter;
+export function getTerminalSession(
+  context: PanelContextValue,
+  sessionId: string
+): TerminalSessionInfo | undefined {
+  const sessions = getTerminalSessions(context);
+  return sessions.find((s) => s.id === sessionId);
 }
 
 /**
- * Panel definition structure that must be exported by all panel packages.
+ * Helper function to check if terminal slice is loading.
  */
-export interface PanelDefinition {
-  // Metadata
-  id: string; // Unique identifier (e.g., 'my-org.example-panel')
-  name: string; // Display name
-  icon?: string; // Icon (emoji or URL)
-  version?: string; // Semantic version (defaults to package.json version)
-  author?: string; // Author name or organization (defaults to package.json author)
-  description?: string; // Short description of panel functionality
-
-  // Component
-  component: ComponentType<PanelComponentProps>;
-
-  // Optional per-panel lifecycle hooks
-  onMount?: (context: PanelContextValue) => void | Promise<void>;
-  onUnmount?: (context: PanelContextValue) => void | Promise<void>;
-  onDataChange?: (slice: PanelDataSlice, data: unknown) => void;
+export function isTerminalLoading(context: PanelContextValue): boolean {
+  return context.isSliceLoading('terminal');
 }
 
 /**
- * Package-level lifecycle hooks (optional).
+ * Helper function to get the current repository path from context.
  */
-export interface PackageLifecycleHooks {
-  onPackageLoad?: () => void | Promise<void>;
-  onPackageUnload?: () => void | Promise<void>;
+export function getRepositoryPath(context: PanelContextValue): string | null {
+  return context.currentScope.repository?.path ?? null;
+}
+
+/**
+ * Helper function to get the terminal data slice directly.
+ */
+export function getTerminalSlice(
+  context: PanelContextValue
+): DataSlice<TerminalSessionInfo[]> | undefined {
+  return context.getSlice<TerminalSessionInfo[]>('terminal');
 }
