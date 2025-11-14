@@ -9,7 +9,8 @@ export type PanelDataSlice =
   | 'markdown'
   | 'fileTree'
   | 'packages'
-  | 'quality';
+  | 'quality'
+  | 'terminal';
 
 /**
  * Panel event types for inter-panel communication.
@@ -23,7 +24,12 @@ export type PanelEventType =
   | 'git:branch-changed'
   | 'panel:focus'
   | 'panel:blur'
-  | 'data:refresh';
+  | 'data:refresh'
+  | 'terminal:data'
+  | 'terminal:exit'
+  | 'terminal:created'
+  | 'terminal:title-change'
+  | 'terminal:cwd-change';
 
 /**
  * Panel event structure for communication between panels.
@@ -98,6 +104,29 @@ export interface QualityMetrics {
 }
 
 /**
+ * Terminal session metadata provided by the host.
+ * Note: Does not include terminal buffer data - that streams via events.
+ */
+export interface TerminalSessionInfo {
+  id: string;
+  pid: number;
+  cwd: string;
+  shell: string;
+  createdAt: number;
+  lastActivity: number;
+  repositoryPath?: string;
+}
+
+/**
+ * Options for creating a terminal session.
+ */
+export interface CreateTerminalSessionOptions {
+  cwd?: string;
+  command?: string;
+  env?: Record<string, string>;
+}
+
+/**
  * Panel context value provided by the host application.
  * Contains shared data and state management functions.
  */
@@ -114,6 +143,9 @@ export interface PanelContextValue {
   packages: PackageLayer[] | null;
   quality: QualityMetrics | null;
 
+  // Terminal sessions (metadata only, no buffer)
+  terminalSessions?: TerminalSessionInfo[];
+
   // State management
   loading: boolean;
   refresh: () => Promise<void>;
@@ -127,10 +159,26 @@ export interface PanelContextValue {
  * Actions provided by the host application for panel interactions.
  */
 export interface PanelActions {
+  // File operations
   openFile?: (filePath: string) => void;
   openGitDiff?: (filePath: string, status?: GitChangeSelectionStatus) => void;
+
+  // Navigation
   navigateToPanel?: (panelId: string) => void;
   notifyPanels?: (event: PanelEvent) => void;
+
+  // Terminal session management
+  createTerminalSession?: (
+    options?: CreateTerminalSessionOptions
+  ) => Promise<string>;
+  destroyTerminalSession?: (sessionId: string) => Promise<void>;
+
+  // Terminal I/O
+  writeToTerminal?: (sessionId: string, data: string) => void;
+  resizeTerminal?: (sessionId: string, cols: number, rows: number) => void;
+
+  // Terminal control
+  clearTerminal?: (sessionId: string) => void;
 }
 
 /**

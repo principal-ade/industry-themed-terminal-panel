@@ -1,15 +1,18 @@
 {
-  "name": "@your-org/panel-starter",
+  "name": "@principal-ade/industry-themed-terminal-panel",
   "version": "0.1.0",
-  "description": "Starter template for building panel extensions compatible with @principal-ade/panel-framework-core",
+  "description": "Terminal panel for panel-framework - integrated terminal emulator with industry theming",
   "type": "module",
   "main": "dist/panels.bundle.js",
   "module": "dist/panels.bundle.js",
   "types": "dist/index.d.ts",
   "keywords": [
-    "panel-extension"
+    "panel-extension",
+    "terminal",
+    "xterm",
+    "terminal-emulator"
   ],
-  "author": "Your Name",
+  "author": "Principal",
   "license": "MIT",
   "scripts": {
     "build": "bun run clean && bun run build:panel && bun run build:types",
@@ -37,6 +40,14 @@
     }
   },
   "dependencies": {
+    "@a24z/industry-theme": "^0.1.2",
+    "@principal-ade/industry-themed-terminal": "^0.1.3",
+    "@xterm/addon-fit": "^0.10.0",
+    "@xterm/addon-search": "^0.15.0",
+    "@xterm/addon-unicode11": "^0.8.0",
+    "@xterm/addon-web-links": "^0.11.0",
+    "@xterm/addon-webgl": "^0.18.0",
+    "@xterm/xterm": "^5.5.0",
     "clsx": "^2.1.1",
     "lucide-react": "^0.552.0"
   },
@@ -79,6 +90,6 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/your-org/panel-starter.git"
+    "url": "git+https://github.com/principal-ade/industry-themed-terminal-panel.git"
   }
 }

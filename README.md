@@ -1,19 +1,21 @@
-# Panel Extension Starter
+# Industry Themed Terminal Panel
 
-A starter template for building panel extensions compatible with `@principal-ade/panel-framework-core`. This template follows the [Panel Extension Store Specification V2](https://github.com/principal-ade/panel-framework/blob/main/PANEL_EXTENSION_STORE_SPECIFICATION_V2.md) and provides everything you need to create, build, and publish custom panels.
+A terminal emulator panel for the [Panel Framework V2](https://github.com/principal-ade/panel-framework), featuring industry theming and full terminal capabilities.
 
-## What is a Panel Extension?
+## Overview
 
-Panel extensions are React components distributed via NPM that can be dynamically loaded into panel-compatible host applications. They provide a standardized way to extend application functionality through a plugin-like architecture.
+This panel package provides a single, non-tabbed terminal emulator that integrates with the panel-framework's actions and events APIs. It uses `@principal-ade/industry-themed-terminal` for consistent styling and xterm.js for terminal emulation.
 
-### Key Features
+## Features
 
-- **NPM Distribution**: Published and installed like any NPM package
-- **Multi-Panel Support**: Single package can export multiple related panels
-- **Framework Integration**: Full access to host application context, actions, and events
-- **Type Safety**: Complete TypeScript support with comprehensive type definitions
-- **Dependency Sharing**: Shared dependencies (React, ReactDOM) provided by host
-- **Self-Contained**: Unique dependencies bundled within the panel
+- Full terminal emulation via xterm.js
+- Industry-themed UI with custom header
+- WebGL acceleration support
+- Unicode 11 support
+- Built-in search functionality
+- Clickable web links
+- Repository-aware session creation
+- Framework-integrated lifecycle management
 
 ## Getting Started
 

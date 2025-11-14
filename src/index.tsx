@@ -1,4 +1,4 @@
-import { ExamplePanel } from './panels/ExamplePanel';
+import { TerminalPanel } from './panels/TerminalPanel';
 import type { PanelDefinition, PanelContextValue } from './types';
 
 /**
@@ -7,35 +7,30 @@ import type { PanelDefinition, PanelContextValue } from './types';
  */
 export const panels: PanelDefinition[] = [
   {
-    id: 'your-org.example-panel',
-    name: 'Example Panel',
-    icon: '📝',
+    id: 'com.principal.terminal',
+    name: 'Terminal',
+    icon: '⚡',
     version: '0.1.0',
-    author: 'Your Organization',
-    description: 'A simple example panel demonstrating the panel framework',
-    component: ExamplePanel,
+    author: 'Principal',
+    description: 'Integrated terminal emulator with industry theming',
+    component: TerminalPanel,
 
     // Optional: Called when this specific panel is mounted
     onMount: async (context: PanelContextValue) => {
       // eslint-disable-next-line no-console
-      console.log('Example Panel mounted', context.repositoryPath);
+      console.log('Terminal Panel mounted for repository:', context.repositoryPath);
 
-      // Example: Refresh data if git slice is available
-      if (context.hasSlice('git') && !context.isSliceLoading('git')) {
-        await context.refresh();
+      // Verify terminal capability is available
+      if (!context.hasSlice('terminal')) {
+        console.warn('Terminal data slice not available in context');
       }
     },
 
     // Optional: Called when this specific panel is unmounted
     onUnmount: async (_context: PanelContextValue) => {
       // eslint-disable-next-line no-console
-      console.log('Example Panel unmounting');
-    },
-
-    // Optional: Called when data slices change
-    onDataChange: (slice, data) => {
-      // eslint-disable-next-line no-console
-      console.log(`Data changed for slice: ${slice}`, data);
+      console.log('Terminal Panel unmounting');
+      // Cleanup handled in component useEffect
     },
   },
 ];
@@ -46,7 +41,7 @@ export const panels: PanelDefinition[] = [
  */
 export const onPackageLoad = async () => {
   // eslint-disable-next-line no-console
-  console.log('Panel package loaded - Example Panel Extension');
+  console.log('Panel package loaded - Terminal Panel Extension');
 };
 
 /**
@@ -55,5 +50,5 @@ export const onPackageLoad = async () => {
  */
 export const onPackageUnload = async () => {
   // eslint-disable-next-line no-console
-  console.log('Panel package unloading - Example Panel Extension');
+  console.log('Panel package unloading - Terminal Panel Extension');
 };
