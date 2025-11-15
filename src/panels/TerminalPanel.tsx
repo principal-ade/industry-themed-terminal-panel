@@ -80,6 +80,11 @@ export const TerminalPanel: React.FC<PanelComponentProps> = ({
   useEffect(() => {
     if (!sessionId) return;
 
+    // Track re-render state for auto-scroll fix
+    let lastWriteTime = 0;
+    let cursorMovedToHome = false;
+    let autoScrollTimeout: NodeJS.Timeout | null = null;
+
     // Subscribe to terminal output
     const unsubscribeData = events.on<{ sessionId: string; data: string }>(
       'terminal:data',
@@ -88,8 +93,46 @@ export const TerminalPanel: React.FC<PanelComponentProps> = ({
           event.payload?.sessionId === sessionId &&
           terminalRef.current
         ) {
+          const data = event.payload.data;
+
+          // Detect cursor move to home (potential re-render start)
+          if (data.includes('\x1b[H')) {
+            cursorMovedToHome = true;
+            lastWriteTime = Date.now();
+          }
+
           // Write data to xterm.js display via ThemedTerminalRef
-          terminalRef.current.write(event.payload.data);
+          terminalRef.current.write(data);
+
+          // If we detected a re-render pattern, schedule auto-scroll to bottom
+          if (cursorMovedToHome) {
+            // Clear any existing timeout
+            if (autoScrollTimeout) {
+              clearTimeout(autoScrollTimeout);
+            }
+
+            // After writes stop for 100ms, assume re-render is done and scroll to bottom
+            autoScrollTimeout = setTimeout(() => {
+              const now = Date.now();
+              const timeSinceLastWrite = now - lastWriteTime;
+
+              // If enough time has passed and we had a cursor-to-home, scroll to bottom
+              if (timeSinceLastWrite >= 100 && cursorMovedToHome && terminalRef.current) {
+                // Get terminal dimensions to move cursor to bottom
+                const terminal = terminalRef.current;
+
+                // Scroll to bottom by moving cursor to last row
+                // This triggers the terminal to auto-scroll to show the cursor
+                terminal.write('\x1b[9999;1H'); // Move to a very high row number (terminal will clamp to actual rows)
+
+                // Reset re-render detection state
+                cursorMovedToHome = false;
+              }
+            }, 100);
+          }
+
+          // Update last write time
+          lastWriteTime = Date.now();
         }
       }
     );
@@ -105,6 +148,9 @@ export const TerminalPanel: React.FC<PanelComponentProps> = ({
     );
 
     return () => {
+      if (autoScrollTimeout) {
+        clearTimeout(autoScrollTimeout);
+      }
       unsubscribeData();
       unsubscribeExit();
     };
