@@ -3,10 +3,9 @@ import {
   ThemedTerminalWithProvider,
   type ThemedTerminalRef,
 } from '@principal-ade/industry-themed-terminal';
-import type { PanelComponentProps } from '@principal-ade/panel-framework-core';
-import type { TerminalPanelActions } from '../types';
+import type { TerminalPanelProps } from '../types';
 import {
-  getRepositoryPath,
+  getTerminalDirectory,
   getTerminalSession,
 } from '../types';
 
@@ -26,35 +25,33 @@ import {
  * - Host must emit terminal events (terminal:data, terminal:exit)
  * - Host must provide 'terminal' data slice with TerminalSessionInfo[]
  */
-export const TerminalPanel: React.FC<PanelComponentProps> = ({
+export const TerminalPanel: React.FC<TerminalPanelProps> = ({
   context,
   actions,
   events,
+  terminalScope = 'repository',
 }) => {
-  // Type-safe access to terminal actions
-  const terminalActions = actions as TerminalPanelActions;
-
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isInitializing, setIsInitializing] = useState(true);
   const terminalRef = useRef<ThemedTerminalRef>(null);
 
-  // Get repository path from context using helper
-  const repositoryPath = getRepositoryPath(context);
+  // Get terminal directory based on terminalScope
+  const terminalDirectory = getTerminalDirectory(context, terminalScope);
 
-  // Create terminal session on mount
+  // Create terminal session on mount ONLY (not on context changes)
   useEffect(() => {
     const initTerminal = async () => {
       try {
-        if (!terminalActions.createTerminalSession) {
+        if (!actions.createTerminalSession) {
           throw new Error(
             'Terminal actions not available. Host must provide createTerminalSession action.'
           );
         }
 
-        // Create session in current repository directory
-        const id = await terminalActions.createTerminalSession({
-          cwd: repositoryPath || undefined,
+        // Create session in determined directory
+        const id = await actions.createTerminalSession({
+          cwd: terminalDirectory || undefined,
         });
 
         setSessionId(id);
@@ -69,12 +66,14 @@ export const TerminalPanel: React.FC<PanelComponentProps> = ({
 
     // Cleanup: destroy session on unmount
     return () => {
-      if (sessionId && terminalActions.destroyTerminalSession) {
-        terminalActions.destroyTerminalSession(sessionId);
+      if (sessionId && actions.destroyTerminalSession) {
+        actions.destroyTerminalSession(sessionId);
       }
     };
+    // IMPORTANT: Only create session on mount, NOT when context changes
+    // This prevents unwanted terminal recreation when repository selection changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [repositoryPath]);
+  }, []);
 
   // Subscribe to terminal data events
   useEffect(() => {
@@ -158,15 +157,15 @@ export const TerminalPanel: React.FC<PanelComponentProps> = ({
 
   // Handle user input to terminal
   const handleTerminalData = (data: string) => {
-    if (sessionId && terminalActions.writeToTerminal) {
-      terminalActions.writeToTerminal(sessionId, data);
+    if (sessionId && actions.writeToTerminal) {
+      actions.writeToTerminal(sessionId, data);
     }
   };
 
   // Handle terminal resize
   const handleTerminalResize = (cols: number, rows: number) => {
-    if (sessionId && terminalActions.resizeTerminal) {
-      terminalActions.resizeTerminal(sessionId, cols, rows);
+    if (sessionId && actions.resizeTerminal) {
+      actions.resizeTerminal(sessionId, cols, rows);
     }
   };
 

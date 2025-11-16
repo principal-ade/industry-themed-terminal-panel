@@ -71,4 +71,6 @@ export type {
   CreateTerminalSessionOptions,
   TerminalPanelActions,
   TerminalEventType,
+  TerminalScope,
+  TerminalPanelProps,
 } from './types';

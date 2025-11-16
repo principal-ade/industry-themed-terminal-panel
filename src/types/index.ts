@@ -109,10 +109,58 @@ export function isTerminalLoading(context: PanelContextValue): boolean {
 }
 
 /**
+ * Determines what directory scope the terminal should use.
+ * - 'repository': Use context.currentScope.repository.path
+ * - 'workspace': Use context.currentScope.workspace.path
+ */
+export type TerminalScope = 'repository' | 'workspace';
+
+/**
+ * Extended props for the TerminalPanel component.
+ */
+export interface TerminalPanelProps extends Omit<import('@principal-ade/panel-framework-core').PanelComponentProps, 'context' | 'actions' | 'events'> {
+  context: PanelContextValue;
+  actions: TerminalPanelActions;
+  events: import('@principal-ade/panel-framework-core').PanelEventEmitter;
+
+  /**
+   * Determines what directory scope the terminal should use.
+   * - 'repository': Use context.currentScope.repository.path
+   * - 'workspace': Use context.currentScope.workspace.path
+   * @default 'repository'
+   */
+  terminalScope?: TerminalScope;
+}
+
+/**
  * Helper function to get the current repository path from context.
  */
 export function getRepositoryPath(context: PanelContextValue): string | null {
   return context.currentScope.repository?.path ?? null;
+}
+
+/**
+ * Helper function to get the current workspace path from context.
+ */
+export function getWorkspacePath(context: PanelContextValue): string | null {
+  return context.currentScope.workspace?.path ?? null;
+}
+
+/**
+ * Helper function to get the terminal directory based on terminalScope.
+ */
+export function getTerminalDirectory(
+  context: PanelContextValue,
+  terminalScope: TerminalScope = 'repository'
+): string | null {
+  switch (terminalScope) {
+    case 'workspace':
+      return getWorkspacePath(context);
+    case 'repository':
+      return getRepositoryPath(context) ?? getWorkspacePath(context);
+    default:
+      return getRepositoryPath(context) ?? getWorkspacePath(context);
+  }
 }
 
 /**

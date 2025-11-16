@@ -14,80 +14,84 @@ This panel package provides a single, non-tabbed terminal emulator that integrat
 - Unicode 11 support
 - Built-in search functionality
 - Clickable web links
-- Repository-aware session creation
+- Configurable directory scope (repository or workspace)
 - Framework-integrated lifecycle management
 
-## Getting Started
-
-### 1. Clone or Use This Template
+## Installation
 
 ```bash
-# Clone the starter
-git clone https://github.com/your-org/panel-starter.git my-panel-extension
-cd my-panel-extension
-
-# Install dependencies
-bun install
-# or: npm install
+npm install @industry-theme/terminal-panel
+# or
+bun install @industry-theme/terminal-panel
 ```
 
-### 2. Customize Your Package
+## Usage
 
-Update `package.json` with your information:
+### Basic Usage
 
-```json
-{
-  "name": "@your-org/your-panel-name",
-  "description": "Your panel description",
-  "author": "Your Name",
-  "keywords": ["panel-extension"],
-  "repository": {
-    "url": "git+https://github.com/your-org/your-panel-name.git"
-  }
+```tsx
+import { TerminalPanel } from '@industry-theme/terminal-panel';
+
+<TerminalPanel
+  context={context}
+  actions={actions}
+  events={events}
+/>
+```
+
+### Workspace Mode
+
+For workspace contexts where the terminal should stay in the workspace directory regardless of repository selection:
+
+```tsx
+<TerminalPanel
+  context={context}
+  actions={actions}
+  events={events}
+  terminalScope="workspace"
+/>
+```
+
+### Repository Mode (Default)
+
+For repository-scoped terminals that use the current repository path:
+
+```tsx
+<TerminalPanel
+  context={context}
+  actions={actions}
+  events={events}
+  terminalScope="repository"
+/>
+```
+
+## Configuration
+
+### `terminalScope` Prop
+
+The `terminalScope` prop controls which directory the terminal uses:
+
+- `'repository'` (default): Uses `context.currentScope.repository.path`, falls back to workspace path if no repository
+- `'workspace'`: Uses `context.currentScope.workspace.path`
+
+```typescript
+type TerminalScope = 'repository' | 'workspace';
+```
+
+### Props
+
+```typescript
+interface TerminalPanelProps {
+  context: PanelContextValue;
+  actions: TerminalPanelActions;
+  events: PanelEventEmitter;
+  terminalScope?: TerminalScope; // 'repository' | 'workspace'
 }
 ```
 
-### 3. Develop Your Panel
+## Development
 
-Edit `src/panels/ExamplePanel.tsx` or create new panel components:
-
-```tsx
-import React from 'react';
-import type { PanelComponentProps } from '../types';
-
-export const MyPanel: React.FC<PanelComponentProps> = ({
-  context,
-  actions,
-  events,
-}) => {
-  return (
-    <div>
-      <h1>My Custom Panel</h1>
-      <p>Repository: {context.repositoryPath}</p>
-    </div>
-  );
-};
-```
-
-### 4. Register Your Panels
-
-Update `src/index.tsx` to export your panel definitions:
-
-```tsx
-import { MyPanel } from './panels/MyPanel';
-
-export const panels = [
-  {
-    id: 'your-org.my-panel',
-    name: 'My Panel',
-    icon: '🚀',
-    description: 'My custom panel',
-    component: MyPanel,
-  },
-];
-```
-
-### 5. Develop with Storybook
+### Develop with Storybook
 
 ```bash
 # Start Storybook for interactive development

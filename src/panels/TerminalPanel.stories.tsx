@@ -435,6 +435,79 @@ export const CompactSize: Story = {
 };
 
 /**
+ * Workspace Mode
+ *
+ * Terminal panel configured to use workspace directory instead of repository directory.
+ * This is useful in workspace contexts where you want the terminal to stay in the
+ * workspace root regardless of which repository is selected.
+ */
+export const WorkspaceMode: Story = {
+  render: () => (
+    <ThemeProvider>
+      <div style={{ height: '600px', width: '100%' }}>
+        <MockPanelProvider
+          contextOverrides={{
+            currentScope: {
+              type: 'workspace' as const,
+              workspace: {
+                name: 'my-workspace',
+                path: '/Users/developer/my-workspace',
+              },
+              repository: {
+                name: 'repo-1',
+                path: '/Users/developer/my-workspace/repo-1',
+              },
+            },
+          }}
+          actionsOverrides={createTerminalMockActions()}
+        >
+          {(props) => {
+            mockBackend.setEventEmitter(props.events);
+            return <TerminalPanel {...props} terminalScope="workspace" />;
+          }}
+        </MockPanelProvider>
+      </div>
+    </ThemeProvider>
+  ),
+};
+
+/**
+ * Repository Mode
+ *
+ * Terminal panel configured to use repository directory (default behavior).
+ * The terminal will be created in the current repository's directory.
+ */
+export const RepositoryMode: Story = {
+  render: () => (
+    <ThemeProvider>
+      <div style={{ height: '600px', width: '100%' }}>
+        <MockPanelProvider
+          contextOverrides={{
+            currentScope: {
+              type: 'workspace' as const,
+              workspace: {
+                name: 'my-workspace',
+                path: '/Users/developer/my-workspace',
+              },
+              repository: {
+                name: 'repo-1',
+                path: '/Users/developer/my-workspace/repo-1',
+              },
+            },
+          }}
+          actionsOverrides={createTerminalMockActions()}
+        >
+          {(props) => {
+            mockBackend.setEventEmitter(props.events);
+            return <TerminalPanel {...props} terminalScope="repository" />;
+          }}
+        </MockPanelProvider>
+      </div>
+    </ThemeProvider>
+  ),
+};
+
+/**
  * Re-render Issue Test Component
  */
 const ReRenderIssueTestComponent: React.FC = () => {
