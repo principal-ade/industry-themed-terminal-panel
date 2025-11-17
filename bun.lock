@@ -5,7 +5,7 @@
       "name": "@your-org/panel-starter",
       "dependencies": {
         "@principal-ade/industry-theme": "^0.1.2",
-        "@principal-ade/industry-themed-terminal": "^0.1.5",
+        "@principal-ade/industry-themed-terminal": "^0.1.7",
         "@principal-ade/panel-framework-core": "^0.1.2",
         "@xterm/addon-fit": "^0.10.0",
         "@xterm/addon-search": "^0.15.0",
@@ -55,8 +55,6 @@
     },
   },
   "packages": {
-    "@a24z/industry-theme": ["@a24z/industry-theme@0.1.2", "", { "peerDependencies": { "react": ">=19.0.0" } }, "sha512-1NtEJMjkwCyYr/liMG8xSDaLEpKKbncwyirWL05VPfHHxNeTPSncDbbH+cQTCK4kS94FgDfxFsAftKQ3M/ZzOg=="],
-
     "@adobe/css-tools": ["@adobe/css-tools@4.4.4", "", {}, "sha512-Elp+iwUx5rN5+Y8xLt5/GRoG20WGoDCQ/1Fb+1LiGtvwbDavuSk0jhD/eZdckHAuzcDzccnkv+rEjyWfRx18gg=="],
 
     "@babel/code-frame": ["@babel/code-frame@7.27.1", "", { "dependencies": { "@babel/helper-validator-identifier": "^7.27.1", "js-tokens": "^4.0.0", "picocolors": "^1.1.1" } }, "sha512-cjQ7ZlQ0Mv3b47hABuTevyTuYN4i+loJKGeV9flcCgIK37cCXRh+L1bd3iBHlynerhQ7BhCkn2BPbQUL+rGqFg=="],
@@ -205,7 +203,7 @@
 
     "@principal-ade/industry-theme": ["@principal-ade/industry-theme@0.1.2", "", { "peerDependencies": { "react": ">=19.0.0" } }, "sha512-qzh9U3cdsIBTWbPvK2s1hMMnUl6Cw0EtT0aajjBsR0JpYccsonZTpkgtOKXyYI7zfJJMOl8fiz5XxMg8Jwsrjw=="],
 
-    "@principal-ade/industry-themed-terminal": ["@principal-ade/industry-themed-terminal@0.1.5", "", { "dependencies": { "@a24z/industry-theme": "^0.1.1" }, "peerDependencies": { "@xterm/addon-fit": ">=0.10.0", "@xterm/addon-search": ">=0.15.0", "@xterm/addon-unicode11": ">=0.8.0", "@xterm/addon-web-links": ">=0.11.0", "@xterm/addon-webgl": ">=0.18.0", "@xterm/xterm": ">=5.5.0", "lucide-react": ">=0.263.0", "react": ">=19.0.0", "react-dom": ">=19.0.0" }, "optionalPeers": ["@xterm/addon-unicode11", "@xterm/addon-webgl", "lucide-react", "react", "react-dom"] }, "sha512-Dp61jS9UFoZION1Tv3ts2qV45d5yakox+vn1q2xV77VK1GWKU1lI8Ek66Bm9O/BxiFUFLp9n4bah/RQEGBUPow=="],
+    "@principal-ade/industry-themed-terminal": ["@principal-ade/industry-themed-terminal@0.1.7", "", { "dependencies": { "@principal-ade/industry-theme": "^0.1.2" }, "peerDependencies": { "@xterm/addon-fit": ">=0.10.0", "@xterm/addon-search": ">=0.15.0", "@xterm/addon-unicode11": ">=0.8.0", "@xterm/addon-web-links": ">=0.11.0", "@xterm/addon-webgl": ">=0.18.0", "@xterm/xterm": ">=5.5.0", "lucide-react": ">=0.263.0", "react": ">=19.0.0", "react-dom": ">=19.0.0" }, "optionalPeers": ["@xterm/addon-unicode11", "@xterm/addon-webgl", "lucide-react", "react", "react-dom"] }, "sha512-pNLpc8nJeOO8Ng3NtZiUejh2hreiT2OYRyUDnKo3Gr7ky5o8/FQEa90ET4brZKe86rtuK52Wa4GwLGEPaJkwig=="],
 
     "@principal-ade/panel-framework-core": ["@principal-ade/panel-framework-core@0.1.2", "", { "dependencies": { "@principal-ai/repository-abstraction": "^0.2.3" }, "peerDependencies": { "react": ">=18.0.0", "react-dom": ">=18.0.0" } }, "sha512-b3Chg0A2Nr1qFyuNI4/KGrwJ0GFZ8cvB9OEbcnBN9NplfyN/aI+5+le9H1Hfh161s3VjAPDDMi61aTJtIJL7iQ=="],
 

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import {
   ThemedTerminalWithProvider,
   type ThemedTerminalRef,
+  type TerminalScrollPosition,
 } from '@principal-ade/industry-themed-terminal';
 import type { TerminalPanelProps } from '../types';
 import {
@@ -34,6 +35,11 @@ export const TerminalPanel: React.FC<TerminalPanelProps> = ({
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isInitializing, setIsInitializing] = useState(true);
+  const [scrollPosition, setScrollPosition] = useState<TerminalScrollPosition>({
+    isAtTop: false,
+    isAtBottom: true,
+    isScrollLocked: true,
+  });
   const terminalRef = useRef<ThemedTerminalRef>(null);
 
   // Get terminal directory based on terminalScope
@@ -169,8 +175,24 @@ export const TerminalPanel: React.FC<TerminalPanelProps> = ({
     }
   };
 
+  // Handle scroll position changes
+  const handleScrollPositionChange = (position: TerminalScrollPosition) => {
+    setScrollPosition(position);
+  };
+
   // Get session metadata from context for display using helper
   const sessionInfo = sessionId ? getTerminalSession(context, sessionId) : undefined;
+
+  // Create header badge based on scroll position
+  const getScrollBadge = () => {
+    if (scrollPosition.isAtTop && !scrollPosition.isAtBottom) {
+      return { label: 'Top', color: '#8be9fd' }; // Cyan
+    }
+    if (!scrollPosition.isScrollLocked) {
+      return { label: 'Scrolled', color: '#ffb86c' }; // Orange
+    }
+    return undefined;
+  };
 
   // Error state
   if (error) {
@@ -222,8 +244,10 @@ export const TerminalPanel: React.FC<TerminalPanelProps> = ({
         ref={terminalRef}
         onData={handleTerminalData}
         onResize={handleTerminalResize}
+        onScrollPositionChange={handleScrollPositionChange}
         headerTitle={sessionInfo?.cwd || 'Terminal'}
         headerSubtitle={sessionInfo?.shell}
+        headerBadge={getScrollBadge()}
         autoFocus={true}
         convertEol={true}
         cursorBlink={true}

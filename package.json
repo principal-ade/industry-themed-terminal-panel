@@ -1,6 +1,6 @@
 {
   "name": "@industry-theme/terminal-panel",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Terminal panel for panel-framework - integrated terminal emulator with industry theming",
   "type": "module",
   "main": "dist/panels.bundle.js",
@@ -36,7 +36,7 @@
   },
   "dependencies": {
     "@principal-ade/industry-theme": "^0.1.2",
-    "@principal-ade/industry-themed-terminal": "^0.1.6",
+    "@principal-ade/industry-themed-terminal": "^0.1.7",
     "@principal-ade/panel-framework-core": "^0.1.2",
     "@xterm/addon-fit": "^0.10.0",
     "@xterm/addon-search": "^0.15.0",
