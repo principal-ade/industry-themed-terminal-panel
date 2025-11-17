@@ -1328,6 +1328,82 @@ const ReRenderIssueTestComponent: React.FC = () => {
 };
 
 /**
+ * Scroll Position Indicators Demo
+ *
+ * Demonstrates the scroll position badges that appear in the terminal header.
+ * The terminal generates lots of output so you can scroll and see the badges in action.
+ *
+ * **Try this:**
+ * 1. Wait for output to finish streaming
+ * 2. Scroll up in the terminal (you should see "Scrolled" badge in orange)
+ * 3. Scroll all the way to the top (badge changes to "Top" in cyan)
+ * 4. Scroll back to bottom (badge disappears - normal state)
+ */
+export const ScrollPositionIndicators: Story = {
+  render: () => {
+    const actionsWithLongOutput: TerminalPanelActions = {
+      ...createTerminalMockActions(),
+      createTerminalSession: async (options) => {
+        const sessionId = mockBackend.createSession(options);
+
+        // Generate lots of output after a short delay
+        setTimeout(() => {
+          for (let i = 1; i <= 100; i++) {
+            setTimeout(() => {
+              const data = `Line ${i}: This is a long line of output to test scrolling behavior\n`;
+              mockBackend['sendData'](sessionId, data);
+            }, i * 20);
+          }
+        }, 500);
+
+        return sessionId;
+      },
+    };
+
+    return (
+      <ThemeProvider>
+        <div style={{ height: '600px', width: '100%' }}>
+          <div style={{
+            padding: '10px',
+            backgroundColor: '#2a2a2a',
+            color: '#fff',
+            marginBottom: '10px',
+            borderRadius: '4px'
+          }}>
+            <p style={{ margin: '5px 0', fontWeight: 'bold' }}>Scroll Position Badge Demo</p>
+            <p style={{ margin: '5px 0', fontSize: '12px', color: '#aaa' }}>
+              Watch the header while you scroll:
+            </p>
+            <ul style={{ margin: '5px 0', paddingLeft: '20px', fontSize: '12px', color: '#aaa' }}>
+              <li><span style={{ color: '#ffb86c' }}>Orange "Scrolled"</span> badge appears when scrolled up from bottom</li>
+              <li><span style={{ color: '#8be9fd' }}>Cyan "Top"</span> badge appears when scrolled all the way to top</li>
+              <li>No badge when at bottom (normal state with auto-scroll enabled)</li>
+            </ul>
+          </div>
+          <MockPanelProvider
+            contextOverrides={{
+              currentScope: {
+                type: 'repository' as const,
+                repository: {
+                  name: 'scroll-demo',
+                  path: '/Users/developer/scroll-demo',
+                },
+              },
+            }}
+            actionsOverrides={actionsWithLongOutput}
+          >
+            {(props) => {
+              mockBackend.setEventEmitter(props.events);
+              return <TerminalPanel {...props} />;
+            }}
+          </MockPanelProvider>
+        </div>
+      </ThemeProvider>
+    );
+  },
+};
+
+/**
  * Re-render Issue Test
  *
  * This story reproduces the issue where Claude Code's Ink renderer re-renders

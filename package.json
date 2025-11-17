@@ -1,6 +1,6 @@
 {
   "name": "@industry-theme/terminal-panel",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "Terminal panel for panel-framework - integrated terminal emulator with industry theming",
   "type": "module",
   "main": "dist/panels.bundle.js",

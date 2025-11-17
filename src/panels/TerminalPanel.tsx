@@ -4,6 +4,8 @@ import {
   type ThemedTerminalRef,
   type TerminalScrollPosition,
 } from '@principal-ade/industry-themed-terminal';
+import { Lock, Unlock, Maximize2, ArrowDown } from 'lucide-react';
+import { useTheme } from '@principal-ade/industry-theme';
 import type { TerminalPanelProps } from '../types';
 import {
   getTerminalDirectory,
@@ -32,6 +34,7 @@ export const TerminalPanel: React.FC<TerminalPanelProps> = ({
   events,
   terminalScope = 'repository',
 }) => {
+  const { theme } = useTheme();
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isInitializing, setIsInitializing] = useState(true);
@@ -183,17 +186,6 @@ export const TerminalPanel: React.FC<TerminalPanelProps> = ({
   // Get session metadata from context for display using helper
   const sessionInfo = sessionId ? getTerminalSession(context, sessionId) : undefined;
 
-  // Create header badge based on scroll position
-  const getScrollBadge = () => {
-    if (scrollPosition.isAtTop && !scrollPosition.isAtBottom) {
-      return { label: 'Top', color: '#8be9fd' }; // Cyan
-    }
-    if (!scrollPosition.isScrollLocked) {
-      return { label: 'Scrolled', color: '#ffb86c' }; // Orange
-    }
-    return undefined;
-  };
-
   // Error state
   if (error) {
     return (
@@ -237,26 +229,135 @@ export const TerminalPanel: React.FC<TerminalPanelProps> = ({
     );
   }
 
-  // Terminal is ready - render the themed terminal component
+  // Handlers for custom controls
+  const handleFit = () => {
+    terminalRef.current?.fit();
+  };
+
+  const handleScrollToBottom = () => {
+    terminalRef.current?.scrollToBottom();
+  };
+
+  // Terminal is ready - render the themed terminal component with custom controls
   return (
-    <div style={{ height: '100%', width: '100%' }}>
-      <ThemedTerminalWithProvider
-        ref={terminalRef}
-        onData={handleTerminalData}
-        onResize={handleTerminalResize}
-        onScrollPositionChange={handleScrollPositionChange}
-        headerTitle={sessionInfo?.cwd || 'Terminal'}
-        headerSubtitle={sessionInfo?.shell}
-        headerBadge={getScrollBadge()}
-        autoFocus={true}
-        convertEol={true}
-        cursorBlink={true}
-        scrollback={10000}
-        enableWebGL={true}
-        enableUnicode11={true}
-        enableSearch={true}
-        enableWebLinks={true}
-      />
+    <div style={{ height: '100%', width: '100%', display: 'flex', flexDirection: 'column' }}>
+      {/* Custom control bar */}
+      <div style={{
+        display: 'flex',
+        gap: '8px',
+        padding: '8px 12px',
+        backgroundColor: theme.colors.backgroundSecondary,
+        borderBottom: `1px solid ${theme.colors.border}`,
+        alignItems: 'center',
+      }}>
+        <span style={{
+          fontSize: '12px',
+          color: theme.colors.textSecondary,
+          marginRight: 'auto',
+          fontFamily: theme.fonts.monospace,
+        }}>
+          {sessionInfo?.cwd || 'Terminal'} • {sessionInfo?.shell}
+        </span>
+
+        {/* Scroll lock badge */}
+        <span style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '4px',
+          fontSize: '11px',
+          padding: '4px 8px',
+          borderRadius: '4px',
+          backgroundColor: scrollPosition.isScrollLocked
+            ? `${theme.colors.success}22`
+            : `${theme.colors.warning}22`,
+          color: scrollPosition.isScrollLocked
+            ? theme.colors.success
+            : theme.colors.warning,
+          border: `1px solid ${scrollPosition.isScrollLocked
+            ? `${theme.colors.success}44`
+            : `${theme.colors.warning}44`}`,
+        }}>
+          {scrollPosition.isScrollLocked ? (
+            <Lock size={12} />
+          ) : (
+            <Unlock size={12} />
+          )}
+          <span>{scrollPosition.isScrollLocked ? 'Locked' : 'Unlocked'}</span>
+        </span>
+
+        {/* Fit button */}
+        <button
+          onClick={handleFit}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '4px',
+            fontSize: '11px',
+            padding: '4px 10px',
+            borderRadius: '4px',
+            backgroundColor: theme.colors.primary,
+            color: theme.colors.text,
+            border: 'none',
+            cursor: 'pointer',
+            transition: 'opacity 0.2s',
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.opacity = '0.8'}
+          onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+          title="Resize terminal to fit container"
+        >
+          <Maximize2 size={12} />
+          <span>Fit</span>
+        </button>
+
+        {/* Scroll to bottom button */}
+        <button
+          onClick={handleScrollToBottom}
+          disabled={scrollPosition.isAtBottom}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '4px',
+            fontSize: '11px',
+            padding: '4px 10px',
+            borderRadius: '4px',
+            backgroundColor: scrollPosition.isAtBottom
+              ? theme.colors.backgroundHover
+              : theme.colors.accent,
+            color: scrollPosition.isAtBottom
+              ? theme.colors.textTertiary
+              : theme.colors.text,
+            border: `1px solid ${theme.colors.border}`,
+            cursor: scrollPosition.isAtBottom ? 'not-allowed' : 'pointer',
+            transition: 'opacity 0.2s',
+            opacity: scrollPosition.isAtBottom ? 0.5 : 1,
+          }}
+          onMouseEnter={(e) => !scrollPosition.isAtBottom && (e.currentTarget.style.opacity = '0.8')}
+          onMouseLeave={(e) => !scrollPosition.isAtBottom && (e.currentTarget.style.opacity = '1')}
+          title="Scroll to bottom and lock"
+        >
+          <ArrowDown size={12} />
+          <span>Bottom</span>
+        </button>
+      </div>
+
+      {/* Terminal */}
+      <div style={{ flex: 1 }}>
+        <ThemedTerminalWithProvider
+          ref={terminalRef}
+          onData={handleTerminalData}
+          onResize={handleTerminalResize}
+          onScrollPositionChange={handleScrollPositionChange}
+          hideHeader={true}
+          autoFocus={true}
+          convertEol={true}
+          cursorBlink={true}
+          scrollback={10000}
+          enableWebGL={true}
+          enableUnicode11={true}
+          enableSearch={true}
+          enableWebLinks={true}
+        />
+      </div>
     </div>
   );
 };
